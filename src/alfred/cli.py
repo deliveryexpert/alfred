@@ -19,6 +19,7 @@ from alfred.providers import build_comedian, available
 from alfred.providers.base import ProviderError
 from alfred.bench.runner import run_benchmark, BenchmarkResult
 from alfred.judging.judge import build_judge
+from alfred import memory
 
 
 def _build_contestants(mock: bool):
@@ -109,6 +110,39 @@ def cmd_run(args: argparse.Namespace) -> int:
     _print_leaderboard(results)
     if args.details:
         _print_details(results)
+
+    if not args.no_save:
+        record = memory.to_record(
+            results, mock=args.mock, judge=args.judge, judge_model=args.judge_model
+        )
+        path = memory.save_run(record)
+        print(f"\n🧠 Run remembered: {path}  (alfred history)")
+    return 0
+
+
+def cmd_history(args: argparse.Namespace) -> int:
+    history = memory.load_history()
+    if not history:
+        print("No runs remembered yet. Run one: alfred run --mock")
+        return 0
+
+    print(f"📚 {len(history)} run(s) on record\n")
+    for run in reversed(history):  # newest first
+        results = run.get("results", [])
+        winner = results[0]["contestant"] if results else "—"
+        tag = " (mock)" if run.get("mock") else ""
+        print(f"  {run['run_id']}{tag}  {len(results)} contestants  🥇 {winner}")
+
+    print("\n" + "=" * 60)
+    print("🏛️  ALL-TIME STANDINGS  (average across every run)")
+    print("=" * 60)
+    for rank, rec in enumerate(memory.standings(history), 1):
+        medal = {1: "🥇", 2: "🥈", 3: "🥉"}.get(rank, f" {rank}.")
+        rating = rec.rating
+        print(f"{medal} {rec.contestant:<24} {rating.pretty()}")
+        print(f"      {rec.appearances} run(s) · {rec.wins} win(s) · "
+              f"avg {rec.avg_score:.1f} · best {rec.best_score:.1f}/100")
+    print("=" * 60)
     return 0
 
 
@@ -132,7 +166,12 @@ def main(argv: list[str] | None = None) -> int:
                        help="model id for the AI panel judge")
     p_run.add_argument("--details", action="store_true",
                        help="print every bit and per-challenge score")
+    p_run.add_argument("--no-save", action="store_true",
+                       help="don't write this run to memory (runs/)")
     p_run.set_defaults(func=cmd_run)
+
+    p_hist = sub.add_parser("history", help="show past runs and all-time standings")
+    p_hist.set_defaults(func=cmd_history)
 
     args = parser.parse_args(argv)
     return args.func(args)

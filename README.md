@@ -18,6 +18,7 @@ a whimsical 0-to-5 scale named after beloved fictional robots:
 | Pluggable judging (AI panel / human / mock) | `src/alfred/judging/judge.py` |
 | The Robot Rating Ladder | `src/alfred/judging/rating.py` |
 | Secure key handling (env / `.env`, never committed) | `src/alfred/config.py` |
+| Memory protocol — saves every run, builds all-time standings | `src/alfred/memory.py` |
 | CLI | `src/alfred/cli.py` |
 
 Design & research docs live in [`docs/`](docs/):
@@ -46,7 +47,13 @@ alfred list
 cp .env.example .env        # then paste in the keys you have
 alfred run                  # every contestant with a key; AI panel judges
 alfred run --judge human    # you rate the (blind) bits yourself
+alfred run --no-save        # don't record this one to memory
+alfred history              # past episodes + all-time standings
 ```
+
+Every run is **remembered** — saved as JSON under `runs/` (git-ignored) so
+episodes are comparable over time and each contestant builds a record (wins,
+average, best). `alfred history` rebuilds the all-time leaderboard from it.
 
 You do **not** need every key — any provider whose key is missing is skipped.
 
