@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "alfred"
+version = "0.1.0"
+description = "Alfred — a humorous benchmark that rates AI models on comedy, in Guffaws."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+# Install only the provider SDKs you actually need, e.g. `pip install -e ".[anthropic]"`.
+anthropic = ["anthropic>=0.40"]
+openai = ["openai>=1.40"]      # also covers xAI, Mistral, Groq, Together, DeepSeek (OpenAI-compatible)
+google = ["google-genai>=0.3"]
+# Everything, for convenience:
+all = [
+    "anthropic>=0.40",
+    "openai>=1.40",
+    "google-genai>=0.3",
+]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+alfred = "alfred.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/alfred"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
