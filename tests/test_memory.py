@@ -51,3 +51,22 @@ def test_history_and_standings(tmp_path):
 
 def test_canonical_name_merges_mock_variants():
     assert memory._canonical("Claude Opus 4.8 (mock)") == "Claude Opus 4.8"
+
+
+def test_standings_markdown_empty():
+    md = memory.standings_markdown([])
+    assert "All-Time Comedy Standings" in md
+    assert "No contests on record" in md
+
+
+def test_write_standings_from_history(tmp_path):
+    rec = memory.to_record(_mock_run(), mock=True, judge="mock", judge_model="n/a")
+    memory.save_run(rec, directory=tmp_path)
+
+    out = tmp_path / "STANDINGS.md"
+    memory.write_standings(out, directory=tmp_path)
+
+    text = out.read_text(encoding="utf-8")
+    assert "Episodes on record: **1**" in text
+    assert "| # | Contestant |" in text
+    assert "Chappie" in text or "R2-D2" in text  # a robot rating rendered

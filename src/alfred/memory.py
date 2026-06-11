@@ -142,3 +142,42 @@ def standings(history: list[dict]) -> list[ContestantRecord]:
 def _canonical(name: str) -> str:
     """Collapse '(mock)' variants so a contestant has one record across runs."""
     return name.replace(" (mock)", "").strip()
+
+
+# --------------------------------------------------------------------------- #
+# Human-readable scoreboard (a committed "memory location")                   #
+# --------------------------------------------------------------------------- #
+
+def standings_markdown(history: list[dict]) -> str:
+    """Render the all-time standings as Markdown for STANDINGS.md."""
+    lines = [
+        "# 🏛️ Alfred — All-Time Comedy Standings",
+        "",
+        "_Auto-generated from `runs/` by `alfred archive`. Do not edit by hand._",
+        "",
+        f"Episodes on record: **{len(history)}**",
+        "",
+    ]
+    table = standings(history)
+    if not table:
+        lines.append("_No contests on record yet. Run one: `alfred run`._")
+        return "\n".join(lines) + "\n"
+
+    lines += [
+        "| # | Contestant | Rating | Runs | Wins | Avg | Best |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for rank, rec in enumerate(table, 1):
+        r = rec.rating
+        lines.append(
+            f"| {rank} | {rec.contestant} | {r.number()}/5 — {r.robot} {r.emoji} | "
+            f"{rec.appearances} | {rec.wins} | {rec.avg_score:.1f} | {rec.best_score:.1f} |"
+        )
+    return "\n".join(lines) + "\n"
+
+
+def write_standings(out_path: Path, directory: Path = DEFAULT_DIR) -> Path:
+    """(Re)generate STANDINGS.md from the run archive."""
+    out_path = Path(out_path)
+    out_path.write_text(standings_markdown(load_history(directory)), encoding="utf-8")
+    return out_path

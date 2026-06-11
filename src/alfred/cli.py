@@ -20,6 +20,7 @@ from alfred.providers.base import ProviderError
 from alfred.bench.runner import run_benchmark, BenchmarkResult
 from alfred.judging.judge import build_judge
 from alfred import memory
+from alfred.archive import archive_memory, ArchiveError
 
 
 def _build_contestants(mock: bool):
@@ -117,6 +118,21 @@ def cmd_run(args: argparse.Namespace) -> int:
         )
         path = memory.save_run(record)
         print(f"\n🧠 Run remembered: {path}  (alfred history)")
+
+        if args.archive:
+            try:
+                print(archive_memory())
+            except ArchiveError as e:
+                print(f"⚠️  Could not archive memory: {e}", file=sys.stderr)
+    return 0
+
+
+def cmd_archive(args: argparse.Namespace) -> int:
+    try:
+        print(archive_memory(message=args.message, push=not args.no_push))
+    except ArchiveError as e:
+        print(f"⚠️  {e}", file=sys.stderr)
+        return 1
     return 0
 
 
@@ -168,10 +184,19 @@ def main(argv: list[str] | None = None) -> int:
                        help="print every bit and per-challenge score")
     p_run.add_argument("--no-save", action="store_true",
                        help="don't write this run to memory (runs/)")
+    p_run.add_argument("--archive", action="store_true",
+                       help="after saving, commit + push the run to the archive (git)")
     p_run.set_defaults(func=cmd_run)
 
     p_hist = sub.add_parser("history", help="show past runs and all-time standings")
     p_hist.set_defaults(func=cmd_history)
+
+    p_arch = sub.add_parser("archive",
+                            help="push saved runs + standings to the archive (git)")
+    p_arch.add_argument("-m", "--message", default=None, help="commit message")
+    p_arch.add_argument("--no-push", action="store_true",
+                        help="commit locally but don't push")
+    p_arch.set_defaults(func=cmd_archive)
 
     args = parser.parse_args(argv)
     return args.func(args)

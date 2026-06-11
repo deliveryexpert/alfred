@@ -48,13 +48,19 @@ cp .env.example .env        # then paste in the keys you have
 alfred run                  # every contestant with a key; AI panel judges
 alfred run --judge human    # you rate the (blind) bits yourself
 alfred run --no-save        # don't record this one to memory
+alfred run --archive        # save, then push the run to the archive (git)
 alfred history              # past episodes + all-time standings
+alfred archive              # push saved runs + STANDINGS.md to the archive
 ```
 
-Every run is **remembered** — saved as JSON under `runs/`, which is **committed
-to git** so the scoreboard is permanent and survives across sessions. Episodes
-are comparable over time and each contestant builds a record (wins, average,
-best). `alfred history` rebuilds the all-time leaderboard from it.
+Every run is **remembered** in two memory locations: the raw JSON under `runs/`
+and a human-readable **`STANDINGS.md`** all-time scoreboard. Both are **committed
+to git** so the scoreboard is permanent and survives across sessions. Saving
+writes to local disk; **`alfred archive`** (or `alfred run --archive`) is the
+step that pushes that memory up to the archive — it regenerates `STANDINGS.md`,
+commits `runs/` + the scoreboard, and pushes with retry/backoff. Each contestant
+builds a record (wins, average, best); `alfred history` rebuilds the leaderboard
+from it.
 
 You do **not** need every key — any provider whose key is missing is skipped.
 
