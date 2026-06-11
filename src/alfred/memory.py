@@ -1,8 +1,9 @@
 """Memory protocol — persist benchmark runs so Alfred remembers past episodes.
 
-Every run is saved as a JSON record under `runs/` (git-ignored). From that
-history we can rebuild all-time standings, track each contestant's record, and
-later seed a persistent ELO/championship rating.
+Every run is saved as a JSON record under `runs/`, which is committed to git so
+the scoreboard is permanent and survives across sessions. From that history we
+can rebuild all-time standings, track each contestant's record, and later seed a
+persistent ELO/championship rating.
 
 A run record is plain JSON (no pickling), so it's safe to read, diff, and ship.
 """

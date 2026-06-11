@@ -16,8 +16,9 @@ venv/
 .mypy_cache/
 .ruff_cache/
 
-# Benchmark run artifacts
-runs/
+# Benchmark run history is KEPT (committed) so the all-time scoreboard is
+# permanent and survives across sessions. Only ignore local scratch runs:
+runs/*.local.json
 *.local.json
 
 # OS / editor

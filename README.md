@@ -51,9 +51,10 @@ alfred run --no-save        # don't record this one to memory
 alfred history              # past episodes + all-time standings
 ```
 
-Every run is **remembered** — saved as JSON under `runs/` (git-ignored) so
-episodes are comparable over time and each contestant builds a record (wins,
-average, best). `alfred history` rebuilds the all-time leaderboard from it.
+Every run is **remembered** — saved as JSON under `runs/`, which is **committed
+to git** so the scoreboard is permanent and survives across sessions. Episodes
+are comparable over time and each contestant builds a record (wins, average,
+best). `alfred history` rebuilds the all-time leaderboard from it.
 
 You do **not** need every key — any provider whose key is missing is skipped.
 
